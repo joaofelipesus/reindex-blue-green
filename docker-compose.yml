@@ -1,0 +1,50 @@
+version: "3"
+
+services:
+  postgres:
+    image: "postgres:13"
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "5432:5432"
+
+  web:
+    depends_on:
+      - "postgres"
+      - "elasticsearch"
+    build: .
+    command: bash -c "(bundle check || bundle install) && bundle exec puma -C config/puma.rb"
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/reindex-blue-green
+      - gems:/gems
+
+  elasticsearch:
+    image: elasticsearch:7.17.9
+    depends_on:
+      - postgres
+    ports:
+      - 9200:9200
+      - 9300:9300
+    volumes:
+      - elasticsearch:/usr/share/elasticsearch/data
+    environment:
+      ES_JAVA_OPTS: -Xms512m -Xmx512m
+      discovery.type: single-node
+
+  kibana:
+    image: kibana:7.17.9
+    depends_on:
+      - elasticsearch
+    ports:
+      - 5601:5601
+    environment:
+      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+
+volumes:
+  postgres:
+  gems:
+  elasticsearch:
