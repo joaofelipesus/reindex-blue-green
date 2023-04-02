@@ -14,4 +14,19 @@ namespace :candidates do
       puts "#{index + 1} of 5000"
     end
   end
+
+  desc 'Index candidates'
+  task mass_indexation: :environment do
+    index_name = 'candidates'
+
+    puts 'Creating index ...'
+    CandidateRepository.new.create_index(index_name)
+    puts 'Index created'
+
+    Candidate.all.find_each.with_index do |candidate, index|
+      CandidateRepository.new.index_candidate(candidate, index_name)
+
+      puts "#{index + 1} of #{Candidate.count}"
+    end
+  end
 end
