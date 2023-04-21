@@ -3,7 +3,7 @@
 namespace :candidates do
   desc 'Create candidates'
   task seed: :environment do
-    100.times do |index|
+    5_000.times do |index|
       Candidate.create!(
         name: Faker::Name.name,
         email: Faker::Internet.email,
@@ -11,7 +11,7 @@ namespace :candidates do
         focus: %w[backend frontend fullstack].sample
       )
 
-      puts "#{index + 1} of 100"
+      puts "#{index + 1} of 5000"
     end
   end
 
