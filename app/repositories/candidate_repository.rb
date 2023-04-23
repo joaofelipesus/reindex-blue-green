@@ -11,7 +11,8 @@ class CandidateRepository
         name: { type: "text" },
         email: { type: "text" },
         experience_time: { type: "integer" },
-        focus: { type: "text" }
+        focus: { type: "text" },
+        favorite_language: { type: "text" }
       }
     }
   }.freeze

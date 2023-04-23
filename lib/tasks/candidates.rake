@@ -8,7 +8,8 @@ namespace :candidates do
         name: Faker::Name.name,
         email: Faker::Internet.email,
         experience_time: rand(1..10),
-        focus: %w[backend frontend fullstack].sample
+        focus: %w[backend frontend fullstack].sample,
+        favorite_language: %w[elixir ruby javascript].sample
       )
 
       puts "#{index + 1} of 5000"
