@@ -17,6 +17,10 @@ class CandidateRepository
     }
   }.freeze
 
+  # Alias names
+  PRODUCTION_ALIAS = 'candidates_index'
+  PROCESSING_ALIAS = 'candidates_processing'
+
   # Create an index with received name.
   #
   # @param index_name [String] index_name
@@ -48,6 +52,32 @@ class CandidateRepository
 
     response.body
   end
+
+  # Create an alias with received name and index.
+  #
+  # @param alias_name [String] alias name.
+  # @param index_name [String] index name.
+  def create_alias(alias_name, index_name)
+    response = conn.post(
+      '_aliases',
+      {
+        actions: [
+          {
+            add: {
+              index: index_name,
+              alias: alias_name
+            }
+          }
+        ]
+      }.to_json
+    )
+
+    return 'Alias created' if response.status == 200
+
+    response.body
+  end
+
+
 
   private
 

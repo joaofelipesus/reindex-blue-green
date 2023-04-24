@@ -18,11 +18,16 @@ namespace :candidates do
 
   desc 'Index candidates'
   task mass_indexation: :environment do
-    index_name = 'candidates'
+    splitted_date_time = DateTime.current.to_s.split('T')
+    date_values = splitted_date_time.first.split('-')
+    time_values = splitted_date_time.last.split(':')
+    index_name = "candidates_#{date_values[0]}_#{date_values[1]}_#{date_values[2]}_#{time_values[0]}_#{time_values[1]}"
 
     puts 'Creating index ...'
     CandidateRepository.new.create_index(index_name)
     puts 'Index created'
+
+    CandidateRepository.new.create_alias(CandidateRepository::PRODUCTION_ALIAS, index_name)
 
     Candidate.all.find_each.with_index do |candidate, index|
       CandidateRepository.new.index_candidate(candidate, index_name)
