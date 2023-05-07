@@ -77,9 +77,74 @@ class CandidateRepository
     response.body
   end
 
+  # Switch indexes pointed by production and processing alias, and at the end removes old production index.
+  def switch_production_alias
+    production_index_name = get_index_name(PRODUCTION_ALIAS)
+    processing_index_name = get_index_name(PROCESSING_ALIAS)
 
+    point_alias_to_index(alias_name: PRODUCTION_ALIAS, index_name: processing_index_name)
+    remove_index_pointer(alias_name: PRODUCTION_ALIAS, index_name: production_index_name)
+    remove_index_pointer(alias_name: PROCESSING_ALIAS, index_name: processing_index_name)
+
+    drop_index(production_index_name)
+  end
 
   private
+
+  # Return the index name that received alias points.
+  #
+  # @param alias_name [String] alias name.
+  def get_index_name(alias_name)
+    response_body = conn.get("#{alias_name}/_alias").body
+    JSON.parse(response_body).keys.first
+  end
+
+  # Points received alias to received index.
+  #
+  # @param alias_name [String] alias name.
+  # @param index_name [String] index name.
+  def point_alias_to_index(alias_name:, index_name:)
+    conn.post(
+      '_aliases',
+      {
+        actions: [
+          {
+            add: {
+              index: index_name,
+              alias: alias_name
+            }
+          }
+        ]
+      }.to_json
+    )
+  end
+
+  # Remove index pointer from received alias.
+  #
+  # @param alias_name [String] alias name.
+  # @param index_name [String] index name.
+  def remove_index_pointer(alias_name:, index_name:)
+    conn.post(
+      '_aliases',
+      {
+        actions: [
+          {
+            remove: {
+              index: index_name,
+              alias: alias_name
+            }
+          }
+        ]
+      }.to_json
+    )
+  end
+
+  # Drop received index.
+  #
+  # @param index_name [String] index name.
+  def drop_index(index_name)
+    conn.delete(index_name)
+  end
 
   def conn
     Faraday.new(
