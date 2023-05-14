@@ -27,7 +27,9 @@ namespace :candidates do
     CandidateRepository.new.create_index(index_name)
     puts 'Index created'
 
+    puts 'Creating alias ...'
     CandidateRepository.new.create_alias(CandidateRepository::PRODUCTION_ALIAS, index_name)
+    puts 'Alias created'
 
     Candidate.all.find_each.with_index do |candidate, index|
       CandidateRepository.new.index_candidate(candidate, index_name)
@@ -55,6 +57,10 @@ namespace :candidates do
       puts "#{index + 1} of #{Candidate.count}"
     end
 
+  end
+
+  desc 'Switch indexes pointed by alias candidates_index'
+  task switch_indexes: :environment do
     puts 'Starting switch indexes'
     CandidateRepository.new.switch_production_alias
     puts 'Switch indexes finished'
